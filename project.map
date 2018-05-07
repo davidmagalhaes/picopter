@@ -1,31 +1,32 @@
 MPLINK 5.00, LINKER
-Linker Map File - Created Mon Apr 23 21:59:05 2018
+Linker Map File - Created Sat May 05 20:58:28 2018
 
                                  Section Info
                   Section       Type    Address   Location Size(Bytes)
                 ---------  ---------  ---------  ---------  ---------
                _entry_scn       code   0x000000    program   0x000006
-                   .cinit    romdata   0x000006    program   0x000002
-               _cinit_scn       code   0x000008    program   0x00009e
-             .code_main.o       code   0x0000a6    program   0x000062
-                    .code       code   0x000108    program   0x000020
-             _startup_scn       code   0x000128    program   0x00001c
-           .code___init.o       code   0x000144    program   0x000002
-         .idata_c018i.o_i    romdata   0x000146    program   0x000000
+           .code___init.o       code   0x000006    program   0x000002
+               int_toogle       code   0x000008    program   0x000006
+                   .cinit    romdata   0x00000e    program   0x00000e
+               _cinit_scn       code   0x00001c    program   0x00009e
+             .code_main.o       code   0x0000ba    program   0x000050
+                    .code       code   0x00010a    program   0x000020
+             _startup_scn       code   0x00012a    program   0x00001c
          .romdata_c018i.o    romdata   0x000146    program   0x000000
-            .code_c018i.o       code   0x000146    program   0x000000
-          .idata_main.o_i    romdata   0x000146    program   0x000000
+          .idata_main.o_i    romdata   0x000146    program   0x000001
           .romdata_main.o    romdata   0x000146    program   0x000000
-        .idata___init.o_i    romdata   0x000146    program   0x000000
         .romdata___init.o    romdata   0x000146    program   0x000000
+         .idata_c018i.o_i    romdata   0x000147    program   0x000000
+        .idata___init.o_i    romdata   0x000147    program   0x000000
+            .code_c018i.o       code   0x000148    program   0x000000
                 MATH_DATA      udata   0x000000       data   0x000002
-                 .tmpdata      udata   0x000002       data   0x000002
+                 .tmpdata      udata   0x000002       data   0x000000
            .udata_c018i.o      udata   0x000060       data   0x00000a
-           .idata_c018i.o      idata   0x00006a       data   0x000000
-            .udata_main.o      udata   0x00006a       data   0x000000
-            .idata_main.o      idata   0x00006a       data   0x000000
-          .udata___init.o      udata   0x00006a       data   0x000000
-          .idata___init.o      idata   0x00006a       data   0x000000
+            .idata_main.o      idata   0x00006a       data   0x000001
+           .idata_c018i.o      idata   0x00006b       data   0x000000
+            .udata_main.o      udata   0x00006b       data   0x000000
+          .udata___init.o      udata   0x00006b       data   0x000000
+          .idata___init.o      idata   0x00006b       data   0x000000
                    .stack      udata   0x000300       data   0x000100
             SFR_UNBANKED0      udata   0x000f62       data   0x00009e
 
@@ -34,33 +35,36 @@ Linker Map File - Created Mon Apr 23 21:59:05 2018
                               Program Memory Usage 
                                Start         End      
                            ---------   ---------      
-                            0x000000    0x000145      
-            326 out of 33048 program addresses used, program memory utilization is 0%
+                            0x000000    0x000146      
+            327 out of 33048 program addresses used, program memory utilization is 0%
 
 
 
                               Symbols - Sorted by Name
                      Name    Address   Location    Storage File                     
                 ---------  ---------  ---------  --------- ---------                
+       ___return_lbl00000   0x00000c    program     static                          
        ___return_lbl00000   0x000004    program     static                          
-       ___return_lbl00001   0x000142    program     static                          
-       ___return_lbl00002   0x0000a4    program     static                          
-                   __init   0x000144    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\__init.c
-            __zero_memory   0x000108    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f4550.asm
-                _do_cinit   0x000008    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\startup\c018i.c
+       ___return_lbl00001   0x000144    program     static                          
+       ___return_lbl00002   0x0000b8    program     static                          
+                   __init   0x000006    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\__init.c
+            __zero_memory   0x00010a    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f4550.asm
+                _do_cinit   0x00001c    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\startup\c018i.c
                    _entry   0x000000    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\startup\c018i.c
-                 _startup   0x000128    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\startup\c018i.c
-                compare_l   0x00011e    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f4550.asm
-                copy_loop   0x00007a    program     static                          
-            copy_one_byte   0x000080    program     static                          
-                     done   0x0000a4    program     static                          
-             done_copying   0x00008e    program     static                          
-                     loop   0x000138    program     static                          
-                   loop_h   0x000116    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f4550.asm
-                   loop_l   0x000120    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f4550.asm
-                     main   0x0000a6    program     extern C:\Users\David\Desktop\Exercicios PIC\Drone Project\main.c
-                     test   0x000022    program     static                          
-               zero_block   0x000116    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f4550.asm
+                 _startup   0x00012a    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\startup\c018i.c
+                compare_l   0x000120    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f4550.asm
+                copy_loop   0x00008e    program     static                          
+            copy_one_byte   0x000094    program     static                          
+                     done   0x0000b8    program     static                          
+             done_copying   0x0000a2    program     static                          
+        handle_int_toogle   0x0000ba    program     extern C:\Users\David\Desktop\Exercicios PIC\Drone Project\main.c
+               int_toogle   0x000008    program     extern C:\Users\David\Desktop\Exercicios PIC\Drone Project\main.c
+                     loop   0x00013a    program     static                          
+                   loop_h   0x000118    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f4550.asm
+                   loop_l   0x000122    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f4550.asm
+                     main   0x0000e4    program     extern C:\Users\David\Desktop\Exercicios PIC\Drone Project\main.c
+                     test   0x000036    program     static                          
+               zero_block   0x000118    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f4550.asm
                    ADCON0   0x000fc2       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f4550.asm
                ADCON0bits   0x000fc2       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f4550.asm
                    ADCON1   0x000fc1       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f4550.asm
@@ -314,10 +318,10 @@ Linker Map File - Created Mon Apr 23 21:59:05 2018
                      WREG   0x000fe8       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f4550.asm
                 __FPFLAGS   0x000001       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\cmath18.asm
             __FPFLAGSbits   0x000001       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\cmath18.asm
-                  __tmp_0   0x000002       data     static C:\Users\David\Desktop\Exercicios PIC\Drone Project\main.c
                 curr_byte   0x000063       data     static E:\3.46\pic18-lt\cxx-framework\src\traditional\startup\c018i.c
                curr_entry   0x000065       data     static E:\3.46\pic18-lt\cxx-framework\src\traditional\startup\c018i.c
                  data_ptr   0x000067       data     static E:\3.46\pic18-lt\cxx-framework\src\traditional\startup\c018i.c
+                        i   0x00006a       data     extern C:\Users\David\Desktop\Exercicios PIC\Drone Project\main.c
                      prom   0x000060       data     static E:\3.46\pic18-lt\cxx-framework\src\traditional\startup\c018i.c
 
 
@@ -327,31 +331,34 @@ Linker Map File - Created Mon Apr 23 21:59:05 2018
                 ---------  ---------  ---------  --------- ---------                
                    _entry   0x000000    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\startup\c018i.c
        ___return_lbl00000   0x000004    program     static                          
-                _do_cinit   0x000008    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\startup\c018i.c
-                     test   0x000022    program     static                          
-                copy_loop   0x00007a    program     static                          
-            copy_one_byte   0x000080    program     static                          
-             done_copying   0x00008e    program     static                          
-       ___return_lbl00002   0x0000a4    program     static                          
-                     done   0x0000a4    program     static                          
-                     main   0x0000a6    program     extern C:\Users\David\Desktop\Exercicios PIC\Drone Project\main.c
-            __zero_memory   0x000108    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f4550.asm
-                   loop_h   0x000116    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f4550.asm
-               zero_block   0x000116    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f4550.asm
-                compare_l   0x00011e    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f4550.asm
-                   loop_l   0x000120    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f4550.asm
-                 _startup   0x000128    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\startup\c018i.c
-                     loop   0x000138    program     static                          
-       ___return_lbl00001   0x000142    program     static                          
-                   __init   0x000144    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\__init.c
+                   __init   0x000006    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\__init.c
+               int_toogle   0x000008    program     extern C:\Users\David\Desktop\Exercicios PIC\Drone Project\main.c
+       ___return_lbl00000   0x00000c    program     static                          
+                _do_cinit   0x00001c    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\startup\c018i.c
+                     test   0x000036    program     static                          
+                copy_loop   0x00008e    program     static                          
+            copy_one_byte   0x000094    program     static                          
+             done_copying   0x0000a2    program     static                          
+                     done   0x0000b8    program     static                          
+       ___return_lbl00002   0x0000b8    program     static                          
+        handle_int_toogle   0x0000ba    program     extern C:\Users\David\Desktop\Exercicios PIC\Drone Project\main.c
+                     main   0x0000e4    program     extern C:\Users\David\Desktop\Exercicios PIC\Drone Project\main.c
+            __zero_memory   0x00010a    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f4550.asm
+                   loop_h   0x000118    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f4550.asm
+               zero_block   0x000118    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f4550.asm
+                compare_l   0x000120    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f4550.asm
+                   loop_l   0x000122    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f4550.asm
+                 _startup   0x00012a    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\startup\c018i.c
+                     loop   0x00013a    program     static                          
+       ___return_lbl00001   0x000144    program     static                          
                      SIGN   0x000000       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\cmath18.asm
                 __FPFLAGS   0x000001       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\cmath18.asm
             __FPFLAGSbits   0x000001       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\cmath18.asm
-                  __tmp_0   0x000002       data     static C:\Users\David\Desktop\Exercicios PIC\Drone Project\main.c
                      prom   0x000060       data     static E:\3.46\pic18-lt\cxx-framework\src\traditional\startup\c018i.c
                 curr_byte   0x000063       data     static E:\3.46\pic18-lt\cxx-framework\src\traditional\startup\c018i.c
                curr_entry   0x000065       data     static E:\3.46\pic18-lt\cxx-framework\src\traditional\startup\c018i.c
                  data_ptr   0x000067       data     static E:\3.46\pic18-lt\cxx-framework\src\traditional\startup\c018i.c
+                        i   0x00006a       data     extern C:\Users\David\Desktop\Exercicios PIC\Drone Project\main.c
                   SPPDATA   0x000f62       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f4550.asm
                    SPPCFG   0x000f63       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f4550.asm
                SPPCFGbits   0x000f63       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f4550.asm
