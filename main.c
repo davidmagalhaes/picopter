@@ -10,10 +10,10 @@
 #define I2C_BITRATE 1249
 #define I2C_READ_BIT 0x01
 
-//Por convenção do projeto, o motor positivo é o motor que gira no sentido horário dentro do eixo, e seu índice é 0 
-#define MOTOR_POSITIVE 0
-//Por convenção do projeto, o motor negativo é o motor que gira no sentido anti-horário dentro do eixo, e seu índice é 1 
-#define MOTOR_NEGATIVE 1
+//Por convenção do projeto, o eixo X está representado pelo índice zero no array AXES
+#define AXIS_X 0
+//Por convenção do projeto, o eixo Y está representado pelo índice um no array AXES
+#define AXIS_Y 1
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
@@ -43,13 +43,15 @@ struct {
 } GYRO = {0, 0, 0, 0, 0, 0, 0};
 
 struct {
-	TMotor motors[2]; // Motores DC que fazem parte do eixo
-	int err;          // <saída esperada> - <saída real>
-	int lasterr;      // Erro do loop anterior. Começa com zero.
-	int reset;        // Soma dos erros. Começa com zero. reset := reset + (gain/tau_i) * err
-	int currstate;    // Estado atual do eixo, ou seja, saída real (Angulo)
-	int setpoint;     // Saída desejada. (Angulo)
-} AXIS_X, AXIS_Y;
+	// Motores DC que fazem parte do eixo
+	TMotor motor_positive; //Por convenção do projeto, o motor positivo é o que faz o valor do eixo crescer positivamente e o que gira no sentido horário dentro do eixo
+	TMotor motor_negative; //Por convenção do projeto, o motor negativo é o que faz o valor do eixo crescer negativamente e o que gira no sentido anti-horário dentro do eixo
+	int err;         	   // <saída esperada> - <saída real>
+	int lasterr;      	   // Erro do loop anterior. Começa com zero.
+	int reset;        	   // Soma dos erros. Começa com zero. reset := reset + (gain/tau_i) * err
+	int currstate;    	   // Estado atual do eixo, ou seja, saída real (Angulo)
+	int setpoint;     	   // Saída desejada. (Angulo)
+} AXES[2];
 
 char pwm_output = 0b00000000; //Saída pwm por pino
 char timecounter = 0; //Contador PWM geral
@@ -59,7 +61,6 @@ char vel_percent[101]; //tabela com valores de resolução para cada duty_cicle
 char adpins[] = {0b00000011, 0b00000111}; //pinos analogicos para serem usados em ADCON0
 char hover_velocity; //Velocidade para manter o drone parado no ar
 char velocity_setpoint; //Setpoint da velocidade do drone, ou seja, a velocidade que o drone tem que estar.
-char pid_output[2]; //Saída do controlador PID para os eixos X e Y
 
 //Váriáveis usadas para implementar a equação PID (Proporcional integral derivada) para estabilização do drone.
 // Equação PID: output := gain * err + reset + (gain * (err - lasterr) / tau_d)
@@ -110,32 +111,32 @@ void handle_int(void){
 	if(timecounter){
 		timecounter--;
 
-		if(!--AXIS_X.motors[MOTOR_POSITIVE].pwm_timecounter){
-			pwm_output &= 0b11111110;
+		if(!--AXES[AXIS_X].motor_positive.pwm_timecounter){
+			pwm_output &= 0b00001110;
 		}
-		if(!--AXIS_X.motors[MOTOR_NEGATIVE].pwm_timecounter){
-			pwm_output &= 0b11111101;
+		if(!--AXES[AXIS_X].motor_negative.pwm_timecounter){
+			pwm_output &= 0b00001101;
 		}
-		if(!--AXIS_Y.motors[MOTOR_POSITIVE].pwm_timecounter){
-			pwm_output &= 0b11111011;
+		if(!--AXES[AXIS_Y].motor_positive.pwm_timecounter){
+			pwm_output &= 0b00001011;
 		}
-		if(!--AXIS_Y.motors[MOTOR_NEGATIVE].pwm_timecounter){
-			pwm_output &= 0b11110111;
+		if(!--AXES[AXIS_Y].motor_negative.pwm_timecounter){
+			pwm_output &= 0b00000111;
 		}
 
 		LATD &= pwm_output;
 	}
 	else{
-		if(AXIS_X.motors[MOTOR_POSITIVE].velocity){
+		if(AXES[AXIS_X].motor_positive.velocity){
 			pwm_output |= 0b00000001;
 		}
-		if(AXIS_X.motors[MOTOR_NEGATIVE].velocity){
+		if(AXES[AXIS_X].motor_negative.velocity){
 			pwm_output |= 0b00000010;
 		}
-		if(AXIS_Y.motors[MOTOR_POSITIVE].velocity){
+		if(AXES[AXIS_Y].motor_positive.velocity){
 			pwm_output |= 0b00000100;
 		}
-		if(AXIS_Y.motors[MOTOR_NEGATIVE].velocity){
+		if(AXES[AXIS_Y].motor_negative.velocity){
 			pwm_output |= 0b00001000;
 		}
 
@@ -143,10 +144,10 @@ void handle_int(void){
 
 		timecounter = PWM_RESOLUTION - 1;
 
-		AXIS_X.motors[MOTOR_POSITIVE].pwm_timecounter = AXIS_X.motors[MOTOR_POSITIVE].velocity;
-		AXIS_X.motors[MOTOR_NEGATIVE].pwm_timecounter = AXIS_X.motors[MOTOR_NEGATIVE].velocity;
-		AXIS_Y.motors[MOTOR_POSITIVE].pwm_timecounter = AXIS_Y.motors[MOTOR_POSITIVE].velocity;
-		AXIS_Y.motors[MOTOR_NEGATIVE].pwm_timecounter = AXIS_Y.motors[MOTOR_NEGATIVE].velocity;
+		AXES[AXIS_X].motor_positive.pwm_timecounter = AXES[AXIS_X].motor_positive.velocity;
+		AXES[AXIS_X].motor_negative.pwm_timecounter = AXES[AXIS_X].motor_negative.velocity;
+		AXES[AXIS_Y].motor_positive.pwm_timecounter = AXES[AXIS_Y].motor_positive.velocity;
+		AXES[AXIS_Y].motor_negative.pwm_timecounter = AXES[AXIS_Y].motor_negative.velocity;
 	}
 }
 
@@ -183,13 +184,10 @@ void handle_isec(void){
 	PIR1bits.ADIF = 0;
 
 		pin = ADCON0 >> 2;
-		ADCON0 = pin ? adpins[0] : adpins[pin+1];
-
-	gyro_input[pin] = (((int)ADRESH << 8) + ADRESL);
-*/
+		ADCON0 = pin ? adpins[0] : adpins[pin+1];*/
 }
 
-void main(){
+void main(){ //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ NÃO DEVO MAIS MEXER NESSE CÓDIGO ATÉ ESTÁ COM EQUIPE @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 	//Pinos digitais
 	TRISDbits.RD0 = 0;
 	TRISDbits.RD1 = 0;
@@ -205,6 +203,7 @@ void main(){
 
 	//Init variables
 	cfg_axes();
+	//init_wifi();
 
 	//Configuração para conversor A/D
 	//ADCON1 = 0b00001001;
@@ -238,64 +237,79 @@ void main(){
 
 //	ADCON0 = 0b00010111; //Inicia varredura de campos analógicos
 
-	/*
-	 *	Usando PID controller para estabilizar o drone, com base nos dados fornecidos pelo giroscópio.
-	 *  Aqui, ele atualiza os valores dos eixos e as velocidades dos motores, aplicando a saída do algoritmo PID.		
-	 */
-	while(1){
+	while(1){ //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ NÃO DEVO MAIS MEXER NESSE CÓDIGO ATÉ ESTÁ COM EQUIPE @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 		int i;
-		char idxG, idxL;
-		char motorGvel, motorLvel;
+		char pid_output;
+		char motorPositive[2], motorNegative[2];
+		char *motorGvel, *motorLvel;
 
-		AXIS_X.err = AXIS_X.setpoint - AXIS_X.currstate;
-		AXIS_X.reset += AXIS_X.err/tau_i;
-		pid_output[0] = gain * (AXIS_X.err + AXIS_X.reset + ((AXIS_X.err - AXIS_X.lasterr) / tau_d)) / GYRO_NORMALIZING_TERM; // ganho proporcional + ganho integral + ganho
-		AXIS_X.lasterr = AXIS_X.err; //Guarda o erro para a próxima iteração
-
-		AXIS_Y.err = AXIS_Y.setpoint - AXIS_Y.currstate;
-		AXIS_Y.reset += AXIS_Y.err/tau_i;
-		pid_output[1] = gain * (AXIS_Y.err + AXIS_Y.reset + ((AXIS_Y.err - AXIS_Y.lasterr) / tau_d)) / GYRO_NORMALIZING_TERM; // ganho proporcional + ganho integral + ganho
-		AXIS_Y.lasterr = AXIS_Y.err; //Guarda o erro para a próxima iteração
-
+		/*
+		 *	Usando PID controller para estabilizar o drone, com base nos dados fornecidos pelo giroscópio.
+		 *  Aqui, ele atualiza os valores dos eixos e as velocidades dos motores, aplicando a saída do algoritmo PID.		
+		 */
 		for(i = 0; i < 2; i++){
-			TMotor *motors = i ? AXIS_X.motors : AXIS_Y.motors;
-			idxG = pid_output[i] > 0 ? MOTOR_POSITIVE : MOTOR_NEGATIVE;
-			idxL = idxG == MOTOR_NEGATIVE ? MOTOR_POSITIVE : MOTOR_NEGATIVE;
+			AXES[i].err = AXES[i].setpoint - AXES[i].currstate;
+			AXES[i].reset += AXES[i].err/tau_i;
+			pid_output = gain * (AXES[i].err + AXES[i].reset + ((AXES[i].err - AXES[i].lasterr) / tau_d)) / GYRO_NORMALIZING_TERM; // ganho proporcional + ganho integral + ganho
+			AXES[i].lasterr = AXES[i].err; //Guarda o erro para a próxima iteração
 
-			motorGvel = motors[idxG].velocity + pid_output[i];
-			motorLvel = motors[idxL].velocity - pid_output[i];
-	
-			if(motorGvel > PWM_RESOLUTION){
-				char incr = motorGvel - PWM_RESOLUTION;
-				motorGvel -= incr;
-				motorLvel -= incr;
+			motorPositive[i] = AXES[i].motor_positive.velocity + pid_output;
+			motorNegative[i] = AXES[i].motor_negative.velocity - pid_output;
+
+			if(pid_output > 0){
+				motorGvel = &motorPositive[i];
+				motorLvel = &motorNegative[i];
 			}
-			if(motorLvel < 0){
-				motorGvel = MIN(motorGvel - motorLvel, PWM_RESOLUTION);
-				motorLvel = 0;
+			else{
+				motorLvel = &motorPositive[i];
+				motorGvel = &motorNegative[i];
 			}
-			
-			motors[idxG].velocity = motorGvel;
-			motors[idxL].velocity = motorLvel;
+
+			if(*motorGvel > PWM_RESOLUTION){
+				char incr = *motorGvel - PWM_RESOLUTION;
+				*motorGvel -= incr;
+				*motorLvel -= incr;
+			}
+			if(*motorLvel < 0){
+				*motorGvel = MIN(*motorGvel - *motorLvel, PWM_RESOLUTION);
+				*motorLvel = 0;
+			}
 		}
+
+		AXES[AXIS_X].motor_positive.velocity = motorPositive[AXIS_X];
+		AXES[AXIS_X].motor_negative.velocity = motorNegative[AXIS_X];
+		AXES[AXIS_Y].motor_positive.velocity = motorPositive[AXIS_Y];
+		AXES[AXIS_Y].motor_negative.velocity = motorNegative[AXIS_Y];
 	}
+}
+
+void cfg_pins(){
+	
+}
+
+void init_hardware_modules(){
+	
+}
+
+void start_PID_control(){
+	
 }
 
 void cfg_axes(){
 	int i = 0;
 	
 	//Inicializando valores dos eixos
-	AXIS_X.err = 0;          
-	AXIS_X.lasterr = 0; 
-	AXIS_X.reset = 0;   
-	AXIS_X.currstate = 0;
-	AXIS_X.setpoint = 0;
+	AXES[AXIS_X].err = 0;          
+	AXES[AXIS_X].lasterr = 0; 
+	AXES[AXIS_X].reset = 0;   
+	AXES[AXIS_X].currstate = 0;
+	AXES[AXIS_X].setpoint = 0;
 
-	AXIS_Y.err = 0;          
-	AXIS_Y.lasterr = 0;   
-	AXIS_Y.reset = 0;     
-	AXIS_Y.currstate = 0; 
-	AXIS_Y.setpoint = 0;
+	AXES[AXIS_Y].err = 0;          
+	AXES[AXIS_Y].lasterr = 0;   
+	AXES[AXIS_Y].reset = 0;     
+	AXES[AXIS_Y].currstate = 0; 
+	AXES[AXIS_Y].setpoint = 0;
 
 	//Inicializa tabela de velocidades por porcentagem
 	for(i = 0; i < 101; i++)
@@ -307,21 +321,21 @@ void cfg_axes(){
 
 
 	//Valores iniciais dos motores
-	AXIS_X.motors[0].velocity = vel_percent[0];
-	AXIS_X.motors[0].port = (unsigned char*) &LATD;
-	AXIS_X.motors[0].pin = 0;
+	AXES[AXIS_X].motor_positive.velocity = vel_percent[0];
+	AXES[AXIS_X].motor_positive.port = (unsigned char*) &LATD;
+	AXES[AXIS_X].motor_positive.pin = 0;
 
-	AXIS_X.motors[1].velocity = vel_percent[0];
-	AXIS_X.motors[1].port = (unsigned char*) &LATD;
-	AXIS_X.motors[1].pin = 1;
+	AXES[AXIS_X].motor_negative.velocity = vel_percent[0];
+	AXES[AXIS_X].motor_negative.port = (unsigned char*) &LATD;
+	AXES[AXIS_X].motor_negative.pin = 1;
 
-	AXIS_Y.motors[0].velocity = vel_percent[25];
-	AXIS_Y.motors[0].port = (unsigned char*) &LATD;
-	AXIS_Y.motors[0].pin = 2;
+	AXES[AXIS_Y].motor_positive.velocity = vel_percent[25];
+	AXES[AXIS_Y].motor_positive.port = (unsigned char*) &LATD;
+	AXES[AXIS_Y].motor_positive.pin = 2;
 
-	AXIS_Y.motors[1].velocity = vel_percent[80];
-	AXIS_Y.motors[1].port = (unsigned char*) &LATD;
-	AXIS_Y.motors[1].pin = 3;
+	AXES[AXIS_Y].motor_negative.velocity = vel_percent[80];
+	AXES[AXIS_Y].motor_negative.port = (unsigned char*) &LATD;
+	AXES[AXIS_Y].motor_negative.pin = 3;
 }
 
 
