@@ -1,11 +1,14 @@
-Projeto de Drone feito com um PIC18. 
-Implementará PID control para estabilidade usando os dados do giroscópio
-Calcula-se que, quando completado, o drone possa alçar vôo em ambiente aberto e durar cerca de 5 minutos no ar antes da bateria acabar.
+Picopter
 
-Microprocessador: PIC18F4550
+Drone project using a PIC18 Microprocessor.
 
-Módulos: 
- - MPU6050 (Giroscópio e Acelerômetro)
+It uses a PID controlling and data from the gyro to stabilize the drone.
+It is expected that, when finished, the drone will be able to fly in a open envioronment for 5 minutes before the battery runs out.
+
+Microprocessor: PIC18F4550
+
+Modules: 
+ - MPU6050 (GiroscÃ³pio e AcelerÃ´metro)
  - 2 L298SMD (Driver de Motor DC. Cada driver trabalha dois motores)
  - 4 Motores DC 3v3 1.8A
  - 1 Bateria 3v3 650mAh
